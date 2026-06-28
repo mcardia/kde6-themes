@@ -1,0 +1,20 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "",
+                "Name": "Mario"
+            }
+        ],
+        "Category": "",
+        "Description": "Tokyo Night macOS-style global theme",
+        "Id": "org.kde.tokyonight.macos.desktop",
+        "License": "GPL-3.0+ and CC-BY-SA-4.0",
+        "Name": "Tokyo Night (macOS)",
+        "Website": ""
+    },
+    "Keywords": "Desktop;Workspace;Appearance;Look and Feel;",
+    "X-Plasma-APIVersion": "2",
+    "X-Plasma-MainScript": "default"
+}

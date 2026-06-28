@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Tokyo Night
+Comment=macOS-style Tokyo Night Plasma theme with translucent panels.
+X-KDE-PluginInfo-Author=Mario
+X-KDE-PluginInfo-Email=
+X-KDE-PluginInfo-Name=Tokyo-Night
+X-KDE-PluginInfo-Version=1.0.0
+X-KDE-PluginInfo-Website=
+X-KDE-PluginInfo-Category=Plasma Theme
+X-KDE-PluginInfo-License=CC BY-SA 4.0
+X-KDE-PluginInfo-EnabledByDefault=true
+X-Plasma-API=5.0
+
+[AdaptiveTransparency]
+enabled=true
