@@ -17,8 +17,10 @@ LayoutName=org.kde.breeze.desktop
 LayoutName=org.kde.breeze.desktop
 
 [kwinrc][org.kde.kdecoration2]
-library=org.kde.kwin.aurorae
-theme=__aurorae__svg__TokyoNight-Dark
+library=org.kde.klassy
+theme=Klassy
+ButtonsOnLeft=XIA
+ButtonsOnRight=
 
 [plasmarc][Theme]
 name=Tokyo-Night
@@ -37,8 +39,17 @@ BlurDocks=true
 BlurMenus=true
 BlurDecorations=true
 BlurNonMatching=true
+CornerRadius=6
 
 [kwinrc][Effect-translucency]
 Dialogs=89
 Inactive=90
 MoveResize=90
+
+# The Klassy decoration style (macOS small circular traffic-light buttons in Tokyo
+# Night colours, no window outline) is shipped as a Klassy preset at
+# ../../../klassy/TokyoNight.klpw and applied by install.sh via:
+#   klassy-settings --import-preset klassy/TokyoNight.klpw
+#   klassy-settings --load-windeco-preset TokyoNight
+# (Klassy reads ~/.config/klassy/klassyrc, which a Look & Feel `defaults` file
+#  cannot target, so the style is not embedded here.)
