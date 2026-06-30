@@ -2,10 +2,10 @@
 #
 # install.sh — install and apply the Tokyo Night (macOS) global theme on KDE Plasma 6.
 #
-# The theme is self-contained: it ships its own color scheme, Plasma desktop theme,
-# window decoration, and a Look & Feel package. Panel color, transparency, blur and the
-# panel layout all travel inside the Look & Feel package, so applying it applies everything.
-# No Panel Colorizer / Material You plasmoid is required.
+# The theme ships its own color scheme, Plasma desktop theme, Look & Feel package
+# (panels/blur/transparency travel inside it), and a Klassy window-decoration preset
+# for the macOS traffic-light buttons. No Panel Colorizer / Material You plasmoid is
+# required. Klassy is an external prerequisite (see docs/PREREQUISITES.md).
 #
 set -euo pipefail
 
@@ -18,13 +18,13 @@ CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 DEST_COLORS="$DATA_HOME/color-schemes"
 DEST_DESKTOPTHEME="$DATA_HOME/plasma/desktoptheme"
-DEST_AURORAE="$DATA_HOME/aurorae/themes"
 DEST_LNF="$DATA_HOME/plasma/look-and-feel"
 
 LNF_ID="org.kde.tokyonight.macos.desktop"
 COLORSCHEME="TokyoNight"
 DESKTOPTHEME="Tokyo-Night"
-DECORATION="__aurorae__svg__TokyoNight-Dark"
+KLASSY_PRESET="$SCRIPT_DIR/klassy/TokyoNight.klpw"
+KLASSY_PRESET_NAME="TokyoNight"
 
 # --- helpers -----------------------------------------------------------------
 c_info()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
@@ -65,6 +65,13 @@ check_prereqs() {
         c_warn "The stock KWin Blur effect also works; see docs/PREREQUISITES.md."
         missing=1
     fi
+    # Klassy decoration provides the macOS traffic-light buttons + KWin-reported corners.
+    if ! find /usr/lib*/qt6/plugins/org.kde.kdecoration3 -iname 'org.kde.klassy.so' 2>/dev/null | grep -q . \
+       && ! command -v klassy-settings >/dev/null 2>&1; then
+        c_warn "Klassy decoration not found — window buttons/corners won't apply."
+        c_warn "Install it from the OBS repo; see docs/PREREQUISITES.md."
+        missing=1
+    fi
     [ "$missing" -eq 0 ] && c_ok "All prerequisites present." \
         || c_warn "See docs/PREREQUISITES.md."
 }
@@ -72,7 +79,7 @@ check_prereqs() {
 # --- install assets ----------------------------------------------------------
 install_assets() {
     c_info "Installing theme assets…"
-    mkdir -p "$DEST_COLORS" "$DEST_DESKTOPTHEME" "$DEST_AURORAE" "$DEST_LNF"
+    mkdir -p "$DEST_COLORS" "$DEST_DESKTOPTHEME" "$DEST_LNF"
 
     install -m 0644 "$SRC/color-schemes/$COLORSCHEME.colors" "$DEST_COLORS/"
     c_ok "color scheme -> $DEST_COLORS/$COLORSCHEME.colors"
@@ -80,10 +87,6 @@ install_assets() {
     rm -rf "$DEST_DESKTOPTHEME/$DESKTOPTHEME"
     cp -a "$SRC/desktoptheme/$DESKTOPTHEME" "$DEST_DESKTOPTHEME/"
     c_ok "desktop theme -> $DEST_DESKTOPTHEME/$DESKTOPTHEME"
-
-    rm -rf "$DEST_AURORAE/TokyoNight-Dark"
-    cp -a "$SRC/aurorae/TokyoNight-Dark" "$DEST_AURORAE/"
-    c_ok "decoration -> $DEST_AURORAE/TokyoNight-Dark"
 
     rm -rf "$DEST_LNF/$LNF_ID"
     cp -a "$SRC/look-and-feel/$LNF_ID" "$DEST_LNF/"
@@ -139,8 +142,9 @@ apply_theme() {
 
     # 3) kwin keys that look-and-feel does NOT apply: decoration, blur, translucency.
     if command -v kwriteconfig6 >/dev/null 2>&1; then
-        kw org.kde.kdecoration2 library org.kde.kwin.aurorae
-        kw org.kde.kdecoration2 theme   "$DECORATION"
+        kw org.kde.kdecoration2 library org.kde.klassy
+        kw org.kde.kdecoration2 ButtonsOnLeft  XIA
+        kw org.kde.kdecoration2 ButtonsOnRight ""
 
         kw Plugins better_blur_dxEnabled true
         kw Plugins blurEnabled false
@@ -151,6 +155,7 @@ apply_theme() {
         kw Effect-better-blur-dx BlurMenus       true
         kw Effect-better-blur-dx BlurDecorations true
         kw Effect-better-blur-dx BlurNonMatching true
+        kw Effect-better-blur-dx CornerRadius    6
 
         kw Effect-translucency Dialogs    89
         kw Effect-translucency Inactive   90
@@ -160,6 +165,18 @@ apply_theme() {
         c_ok "kwin decoration + blur + translucency written"
     else
         c_warn "kwriteconfig6 not found; blur/translucency/decoration not applied."
+    fi
+
+    # 3b) Klassy decoration style: macOS small circular traffic-light buttons in the
+    # Tokyo Night palette, no window outline. kwriteconfig6 does NOT apply Klassy's
+    # button style — only klassy-settings does (it writes ~/.config/klassy/klassyrc).
+    if command -v klassy-settings >/dev/null 2>&1 && [ -f "$KLASSY_PRESET" ]; then
+        klassy-settings --import-preset "$KLASSY_PRESET" >/dev/null 2>&1 || true
+        klassy-settings --load-windeco-preset "$KLASSY_PRESET_NAME" >/dev/null 2>&1 || true
+        c_ok "Klassy preset applied ($KLASSY_PRESET_NAME)"
+    else
+        c_warn "klassy-settings/preset missing — Tokyo Night window buttons not applied."
+        c_warn "Install Klassy; see docs/PREREQUISITES.md."
     fi
 
     # 4) Reload KWin so decoration/blur/translucency take effect now.

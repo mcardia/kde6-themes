@@ -12,7 +12,6 @@ DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 
 DEST_COLORS="$DATA_HOME/color-schemes"
 DEST_DESKTOPTHEME="$DATA_HOME/plasma/desktoptheme"
-DEST_AURORAE="$DATA_HOME/aurorae/themes"
 DEST_LNF="$DATA_HOME/plasma/look-and-feel"
 
 LNF_ID="org.kde.tokyonight.macos.desktop"
@@ -35,7 +34,6 @@ command -v plasma-apply-desktoptheme >/dev/null 2>&1 && plasma-apply-desktopthem
 c_info "Removing installed Tokyo Night assets…"
 rm -f  "$DEST_COLORS/TokyoNight.colors"                  && c_ok "removed color scheme"
 rm -rf "$DEST_DESKTOPTHEME/Tokyo-Night"                  && c_ok "removed desktop theme"
-rm -rf "$DEST_AURORAE/TokyoNight-Dark"                   && c_ok "removed decoration"
 rm -rf "$DEST_LNF/$LNF_ID"                               && c_ok "removed look-and-feel package"
 
 # Reconfigure KWin.

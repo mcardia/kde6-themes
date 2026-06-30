@@ -12,8 +12,9 @@ component and does not depend on other installed themes or extra plasmoids.
 - **Color scheme** — `Tokyo Night` (static; does not change with the wallpaper).
 - **Plasma desktop theme** — `Tokyo Night` with translucent panels (panels, popups,
   tooltips, system tray).
-- **Window decoration** — `TokyoNight-Dark`, a macOS-style titlebar with Tokyo Night
-  traffic-light buttons.
+- **Window decoration** — the **Klassy** decoration with the bundled `klassy/TokyoNight.klpw`
+  preset: small circular traffic-light buttons in the Tokyo Night palette, on the left
+  (macOS style). Klassy is an external prerequisite.
 - **Look & Feel package** — `Tokyo Night (macOS)`, which also carries the **blur**,
   **transparency** and **panel layout**, so applying the theme applies all of it.
 
@@ -25,9 +26,10 @@ theme, their **transparency** from that theme's translucent panel background, an
 
 ## Prerequisites
 
-For the blur/"vibrancy" the theme expects **Better Blur DX** (the stock KWin Blur effect
-also works). See [docs/PREREQUISITES.md](docs/PREREQUISITES.md). The theme still applies
-without it — panels stay translucent, just not blurred.
+The theme needs the **Klassy** window decoration (for the macOS traffic-light buttons and the
+corners that match the blur) and a KWin blur effect — **Better Blur DX** (the stock KWin Blur
+also works). See [docs/PREREQUISITES.md](docs/PREREQUISITES.md). Without the blur, panels stay
+translucent but unblurred; without Klassy, the window buttons/corners won't be the macOS style.
 
 ## Installation
 

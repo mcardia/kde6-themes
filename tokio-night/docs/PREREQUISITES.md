@@ -1,7 +1,9 @@
 # Prerequisites — Tokyo Night (macOS)
 
-The theme ships its own recolored visual assets (color scheme, Plasma desktop theme, window
-decoration, Look & Feel package) and does **not** depend on any third-party plasmoid.
+The theme ships its own recolored color scheme, Plasma desktop theme and Look & Feel package,
+plus a Klassy decoration preset. It does **not** depend on any third-party plasmoid, but it
+needs two external pieces installed: the **Klassy** window decoration (the macOS window buttons)
+and a KWin **blur** effect.
 
 The panels are native Plasma panels:
 
@@ -10,6 +12,24 @@ The panels are native Plasma panels:
 - **Transparency** comes from that theme's translucent panel background plus the panel
   Opacity = Translucent setting (carried in the layout).
 - **Blur** is rendered by a KWin blur effect behind the translucent panel.
+
+## Required: Klassy window decoration
+
+Provides the macOS-style small circular **traffic-light buttons** (recolored to the Tokyo Night
+palette) and reports its corner radius to KWin so the blur rounds to match the window corners.
+The theme ships a Klassy preset at `klassy/TokyoNight.klpw` that `install.sh` applies via
+`klassy-settings --import-preset` + `--load-windeco-preset TokyoNight`.
+
+- Requires **Klassy 6.3+** (KDecoration3 / Plasma 6.3+); tested on Plasma 6.7.
+- Fedora (from the maintainer's OBS repo):
+  ```sh
+  sudo dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/home:/paulmcauley/Fedora_44/home:paulmcauley.repo
+  sudo dnf install klassy
+  ```
+  Other distros: see https://github.com/paulmcauley/klassy (OBS repos for openSUSE,
+  Debian/Ubuntu, Arch/Manjaro, Mageia).
+- Without Klassy the theme still applies (colors, panels, blur), but the window
+  buttons/corners won't be the macOS style.
 
 ## Recommended for the best look
 

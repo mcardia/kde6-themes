@@ -30,16 +30,33 @@ Key gotchas (see `tmp/handoff.md`): Klassy reads `~/.config/klassy/klassyrc` gro
 `klassy-settings --import-preset <f.klpw>` + `--load-windeco-preset <name>` does. Button colours
 use a per-button JSON override: `ButtonOverrideColorsActiveClose={"BackgroundNormal":[r,g,b],...}`.
 
-## Remaining integration (next session — was wrapping up)
-- `tokio-night/install.sh`: after the L&F apply, run
-  `klassy-settings --import-preset "$SCRIPT_DIR/klassy/TokyoNight.klpw" && klassy-settings
-  --load-windeco-preset TokyoNight`, set decoration `library=org.kde.klassy`, `ButtonsOnLeft=XIA`.
-  Add a Klassy presence check. (Defaults already point decoration to Klassy.)
-- `docs/PREREQUISITES.md` + README: require **Klassy** (OBS repo) instead of the MacTahoe aurorae;
-  keep Better Blur DX.
-- Remove the now-dead `tokio-night/src/aurorae/TokyoNight-Dark/` + its install lines.
-- Keep the INSTALLED L&F `defaults` synced with source after edits (`cp` to
-  `~/.local/share/plasma/look-and-feel/org.kde.tokyonight.macos.desktop/contents/defaults`).
+## Klassy packaging — DONE (#1–#4, UNCOMMITTED, ready to commit)
+All four pendencies are applied in the working tree (lint clean, no orphan aurorae refs):
+- **#1 `tokio-night/install.sh`** — removed dead aurorae handling; decoration → `org.kde.klassy`
+  + `ButtonsOnLeft=XIA` + blur `CornerRadius=6`; imports/loads the Klassy preset via
+  `klassy-settings`; `check_prereqs` warns if Klassy missing. Tested: `uninstall.sh` → Breeze,
+  then `install.sh` reproduced everything (Klassy, TN colours, blur, padding).
+- **#2** `git rm -r tokio-night/src/aurorae/TokyoNight-Dark/` (staged as deleted). Restore point:
+  tag **`before-remove-aurorae`** (= commit 381914f, last state with the aurorae).
+- **#3** `tokio-night/README.md` + `docs/PREREQUISITES.md` now require **Klassy** (OBS
+  `home:paulmcauley` Fedora_44; install cmds in PREREQUISITES) instead of the MacTahoe aurorae.
+- **#4** `tokio-night/uninstall.sh` — dropped the dead `DEST_AURORAE` var + aurorae-removal line
+  (it already reverts decoration to Breeze).
+
+**Next: ONE commit** of the working tree (install.sh, uninstall.sh, README, PREREQUISITES, the
+aurorae deletions, RESUME) + push. (Needs operator approval.) After committing, keep the INSTALLED
+L&F `defaults` synced with source if you re-edit it (`cp` to
+`~/.local/share/plasma/look-and-feel/org.kde.tokyonight.macos.desktop/contents/defaults`).
+
+## Future polish (deferred — fiddly, low impact)
+- [ ] **Round the dock task-hover highlight** corners to match the panel radius (~10px). It is a
+  9-slice in `tokio-night/src/desktoptheme/Tokyo-Night/widgets/tasks.svgz` (`hover-*` elements,
+  hardcoded TN colours, `stroke:none`, hover-center `#7aa2f7` @ opacity 0.4); round the 4 corner
+  paths (+ `focus`/`active` for consistency). Done blind → iterate. Cleaner alt: transplant a
+  rounded hover 9-slice from the Breeze/default theme and recolour.
+- [ ] **Running-app indicator → macOS dot.** Change the dock (icontasks) running-task indicator
+  from KDE's bar/underline to a small dot like macOS. Investigate whether it is an icontasks
+  setting, a `tasks.svgz` element, or needs a different task widget.
 
 ## Untracked, left as-is
 `reference-padding/` (GPL spec copy) and `reload-padding.sh` (scratch). Live `~/.config` edits
