@@ -2,73 +2,69 @@
 
 KDE Plasma 6.7 (Wayland, Fedora 44) theming repo. Two parts:
 1. **`tokio-night/`** — Tokyo Night macOS-style **global theme** (color scheme, recolored Plasma
-   desktop theme, Look & Feel with panels/blur/transparency, installer). Self-contained bundle.
+   desktop theme, Look & Feel with panels/blur/transparency, Klassy decoration preset, wallpapers,
+   installer). Self-contained bundle.
 2. **`padding/`** — git **submodule** (fork `git@github.com:mcardia/padding.git`): a TypeScript
    KWin script that adds gaps around **maximized + snapped** windows. Built with `npm run build`
    → `pkg/contents/code/main.js`.
 
-> Detailed session state, debug notes, and next steps live in **`tmp/handoff.md`** (gitignored,
+> Detailed session state, debug notes, exact specs live in **`tmp/handoff.md`** (gitignored,
 > local only). Read it first if present. This RESUME is the self-sufficient summary for a fresh clone.
 
-## Git state
-- Parent branch **`feature/tokio-night-theme`**, HEAD **`8a5747e`** (not pushed). Tags:
-  `before-plan-tokyonight-macos`, `before-plan-per-side-gaps` (restore points).
-- Submodule `padding/` on **`main`** @ `9c28262` (working: maximized+snap, single `gapSize`).
-  Branch `per-side-gaps-wip` = a per-side-gaps refactor that **did not work** (parked).
-- Fresh clone needs: `git submodule update --init padding`.
+## Status: THEME DONE
+The Tokyo Night global theme is complete and approved. Decoration (Klassy), dock polish, and
+wallpapers are all finished. No active pending work.
+
+## Git state — CLEAN (only RESUME.md uncommitted)
+- Parent branch **`feature/tokio-night-theme`**, HEAD **`fea3076`**, pushed & in sync with
+  `origin`. Working tree clean except an intentional `RESUME.md` edit.
+- Recent: `fea3076` wallpapers · `1293105` rounded dock hover · `b5357da` Klassy packaging.
+- Tags: `before-plan-tokyonight-macos`, `before-plan-per-side-gaps`, **`before-remove-aurorae`**
+  (= 381914f, last state WITH the aurorae decoration, restore point).
+- Submodule `padding/` on **`main`** @ `9c28262` (working: maximized+snap), clean, pushed.
+  Fresh clone needs: `git submodule update --init padding`.
+- `gh` CLI token invalid → push over SSH (works).
 
 ## Decoration: DONE (Klassy)
-Window decoration switched from aurorae (MacTahoe) to **Klassy** (installed from OBS
-`home:paulmcauley`, Fedora_44) because Klassy reports its corner radius to KWin so Better Blur DX
-matches the corners (aurorae could not → blur "tip" artifact). The macOS look is finished and
-approved: **small circular traffic-light buttons in Tokyo Night colours** (close `#f7768e`, min
-`#e0af68`, max `#9ece6a`), symbols on hover, window outline OFF, corner radius 6, buttons on the
-left. This is a **Klassy preset** committed at `tokio-night/klassy/TokyoNight.klpw`.
+Window decoration is **Klassy** (installed from OBS `home:paulmcauley`, Fedora_44) because Klassy
+reports its corner radius to KWin so Better Blur DX matches the corners. macOS look: **small
+circular traffic-light buttons in Tokyo Night colours** (close `#f7768e`, min `#e0af68`, max
+`#9ece6a`), symbols on hover, window outline OFF, corner radius 6, buttons on the left. Committed as
+Klassy preset `tokio-night/klassy/TokyoNight.klpw`. `install.sh` imports/loads it via
+`klassy-settings`, sets `org.kde.klassy` + `ButtonsOnLeft=XIA` + blur `CornerRadius=6`, and warns if
+Klassy is absent. (Klassy reads `~/.config/klassy/klassyrc` `[Windeco]`; only
+`klassy-settings --import-preset` + `--load-windeco-preset` applies the button style — not
+kwriteconfig6+reconfigure. Button colours are per-button JSON `ButtonOverrideColorsActiveClose=...`.)
 
-Key gotchas (see `tmp/handoff.md`): Klassy reads `~/.config/klassy/klassyrc` group `[Windeco]`;
-`kwriteconfig6`+reconfigure does NOT apply Klassy button style — only
-`klassy-settings --import-preset <f.klpw>` + `--load-windeco-preset <name>` does. Button colours
-use a per-button JSON override: `ButtonOverrideColorsActiveClose={"BackgroundNormal":[r,g,b],...}`.
+## Dock polish: DONE
+- **B) Rounded task-hover highlight — DONE (commit `1293105`).** The hover 9-slice in
+  `tokio-night/src/desktoptheme/Tokyo-Night/widgets/tasks.svgz` now has **12px arc corners
+  (= panel radius)**, uniform `#7aa2f7` @0.4. (To re-edit a `.svgz`: `zcat`→edit→`gzip` back; FrameSvg
+  renders corners at native SVG px.)
+- **A) Running-app indicator → macOS dot — SKIPPED (not viable via theme).** Plasma 6.7's
+  taskmanager QML is compiled into `org.kde.plasma.taskmanager.so` (no loose QML, no indicator
+  config, no SVG indicator element, no pluggable indicator). Only routes are forking the applet into
+  a custom plasmoid or patching/rebuilding Plasma — both rejected. Operator decided to skip.
 
-## Klassy packaging — DONE (#1–#4, UNCOMMITTED, ready to commit)
-All four pendencies are applied in the working tree (lint clean, no orphan aurorae refs):
-- **#1 `tokio-night/install.sh`** — removed dead aurorae handling; decoration → `org.kde.klassy`
-  + `ButtonsOnLeft=XIA` + blur `CornerRadius=6`; imports/loads the Klassy preset via
-  `klassy-settings`; `check_prereqs` warns if Klassy missing. Tested: `uninstall.sh` → Breeze,
-  then `install.sh` reproduced everything (Klassy, TN colours, blur, padding).
-- **#2** `git rm -r tokio-night/src/aurorae/TokyoNight-Dark/` (staged as deleted). Restore point:
-  tag **`before-remove-aurorae`** (= commit 381914f, last state with the aurorae).
-- **#3** `tokio-night/README.md` + `docs/PREREQUISITES.md` now require **Klassy** (OBS
-  `home:paulmcauley` Fedora_44; install cmds in PREREQUISITES) instead of the MacTahoe aurorae.
-- **#4** `tokio-night/uninstall.sh` — dropped the dead `DEST_AURORAE` var + aurorae-removal line
-  (it already reverts decoration to Breeze).
-
-**Next: ONE commit** of the working tree (install.sh, uninstall.sh, README, PREREQUISITES, the
-aurorae deletions, RESUME) + push. (Needs operator approval.) After committing, keep the INSTALLED
-L&F `defaults` synced with source if you re-edit it (`cp` to
-`~/.local/share/plasma/look-and-feel/org.kde.tokyonight.macos.desktop/contents/defaults`).
-
-## Future polish (deferred — fiddly, low impact)
-- [ ] **Round the dock task-hover highlight** corners to match the panel radius (~10px). It is a
-  9-slice in `tokio-night/src/desktoptheme/Tokyo-Night/widgets/tasks.svgz` (`hover-*` elements,
-  hardcoded TN colours, `stroke:none`, hover-center `#7aa2f7` @ opacity 0.4); round the 4 corner
-  paths (+ `focus`/`active` for consistency). Done blind → iterate. Cleaner alt: transplant a
-  rounded hover 9-slice from the Breeze/default theme and recolour.
-- [ ] **Running-app indicator → macOS dot.** Change the dock (icontasks) running-task indicator
-  from KDE's bar/underline to a small dot like macOS. Investigate whether it is an icontasks
-  setting, a `tasks.svgz` element, or needs a different task widget.
+## Wallpapers: DONE (commit `fea3076`)
+Four dark Tokyo Night wallpapers at **2560×1600** (native, 16:10) in `tokio-night/wallpapers/`:
+`tokyo-night-{city,material,wood,bricks}-2560x1600.png` (also in `~/Pictures/Wallpapers/`).
+Generated by Gemini "Nano Banana" (1312×816, 16:10), Gemini watermark removed, Lanczos-upscaled to
+native. **bricks is the currently applied desktop wallpaper.** Apply any with
+`plasma-apply-wallpaperimage <file>`. Monitor (eDP-1) is **2560×1600 16:10**.
 
 ## Untracked, left as-is
 `reference-padding/` (GPL spec copy) and `reload-padding.sh` (scratch). Live `~/.config` edits
-(kwinrc decoration/blur, `~/.config/klassy/klassyrc`) are NOT in git — the committed Klassy preset
-reproduces them.
+(kwinrc, klassyrc) are NOT in git — the committed Klassy preset reproduces them.
 
 ## Build / install quick ref
 - Padding: `cd padding && npm install && npm run build`; `./install.sh` (kpackagetool6 + enable).
 - Theme: `cd tokio-night && ./install.sh` (backs up live config; `--uninstall` to revert).
-- KWin reload after config: `qdbus-qt6 org.kde.KWin /KWin reconfigure` (note: does NOT reload a
-  KWin *script's* code — toggle the plugin for that).
+- KWin reload after config: `qdbus-qt6 org.kde.KWin /KWin reconfigure` (does NOT reload a KWin
+  *script's* code — toggle the plugin for that). Desktop-theme SVG change: clear
+  `~/.cache/plasma_theme_Tokyo-Night.kcache` + restart plasmashell.
 
 ## Operating notes
-- **"aguarde"/"wait" = stop all actions** until told to proceed (we collided on live config once).
-- Commits require explicit approval. `gh` CLI token is currently invalid; push over SSH works.
+- **"aguarde"/"wait" = stop all actions** until told to proceed.
+- Repo theme-file edits and git commits require explicit per-item approval. Terminal commands
+  (incl. live config tweaks, magick, plasmashell restart) are pre-approved.
