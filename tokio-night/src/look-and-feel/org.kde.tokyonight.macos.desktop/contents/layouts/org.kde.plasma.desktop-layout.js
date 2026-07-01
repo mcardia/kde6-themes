@@ -38,10 +38,6 @@ var layout = {
             "applets": [
                 {
                     "config": {
-                        "/": {
-                            "popupHeight": "601",
-                            "popupWidth": "749"
-                        },
                         "/ConfigDialog": {
                             "DialogHeight": "630",
                             "DialogWidth": "810"
@@ -52,7 +48,7 @@ var layout = {
                             "systemFavorites": "suspend\\,hibernate\\,reboot\\,shutdown"
                         }
                     },
-                    "plugin": "org.kde.plasma.kickoff"
+                    "plugin": "org.kde.plasma.kickerdash"
                 },
                 {
                     "config": {},

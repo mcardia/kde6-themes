@@ -2,7 +2,8 @@
 
 A complete, self-contained global theme for KDE Plasma 6 that pairs the **Tokyo Night**
 color palette (the *Night* variant, matching the VSCode theme) with a **macOS-style**
-desktop: a top panel with a global menu, system tray and clock, and a bottom icon dock.
+desktop: a top panel with a full-screen Application Dashboard launcher, a global menu,
+system tray and clock, and a bottom icon dock.
 
 The theme is **self-contained** — it ships its own recolored copies of every visual
 component and does not depend on other installed themes or extra plasmoids.
@@ -19,6 +20,12 @@ component and does not depend on other installed themes or extra plasmoids.
   (macOS style). Klassy is an external prerequisite.
 - **Look & Feel package** — `Tokyo Night (macOS)`, which also carries the **blur**,
   **transparency** and **panel layout**, so applying the theme applies all of it.
+- **Konsole color scheme** — `Tokyo Night`, the Tokyo Night terminal ANSI palette with a
+  subtly translucent, blurred background to match the desktop. The installer points your
+  default Konsole profile at it; reopen Konsole windows to see it.
+- **Albert launcher** — a macOS Spotlight-style launcher, installed by `install.sh` and added
+  to the KDE autostart. Albert comes from a **non-official** repo; see
+  [docs/PREREQUISITES.md](docs/PREREQUISITES.md).
 
 ## How the panels work (no extra plasmoid required)
 
@@ -42,8 +49,8 @@ translucent but unblurred; without Klassy, the window buttons/corners won't be t
 ./install.sh --help
 ```
 
-`install.sh` backs up your live `kdeglobals`, `kwinrc`, panel and splash config to
-`~/.local/share/tokio-night-backups/<timestamp>/` before applying.
+`install.sh` backs up your live `kdeglobals`, `kwinrc`, panel and splash config (and your
+default Konsole profile) to `~/.local/share/tokio-night-backups/<timestamp>/` before applying.
 
 ## Uninstall
 

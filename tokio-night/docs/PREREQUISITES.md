@@ -45,6 +45,25 @@ If Better Blur DX is not installed, the **stock KWin "Blur" effect** also blurs 
 panels — enable it in *System Settings → Desktop Effects → Blur*. Without any blur effect the
 panels are still translucent, just not blurred.
 
+## Albert launcher (installed automatically, non-official repo)
+
+The theme uses **Albert** as a macOS Spotlight-style launcher and adds it to the KDE autostart
+(`~/.config/autostart/albert.desktop`). `install.sh` installs it for you, but Albert is **not**
+in the official Fedora repositories — it comes from the maintainer's **non-official** openSUSE
+Build Service repo `home:manuelschneid3r`.
+
+- On Fedora, `install.sh` adds that repo (for the detected Fedora version) and runs
+  `sudo dnf install -y albert` — so it will prompt for your password and to import the repo's
+  GPG key. If Albert is already installed, only the autostart entry is written.
+- Equivalent manual install:
+  ```sh
+  sudo dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/home:/manuelschneid3r/Fedora_$(rpm -E %fedora)/home:manuelschneid3r.repo
+  sudo dnf install albert
+  ```
+  Other distros: see https://albertlauncher.github.io/installing/.
+- `uninstall.sh` removes only the autostart entry; the Albert package and its repo are left in
+  place (remove them manually if you don't want them).
+
 ## Standard Plasma widgets
 
 Used by the panels and normally preinstalled:

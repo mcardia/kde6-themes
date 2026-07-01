@@ -15,16 +15,23 @@ SRC="$SCRIPT_DIR/src"
 
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+AUTOSTART_DIR="$CONFIG_HOME/autostart"
 
 DEST_COLORS="$DATA_HOME/color-schemes"
 DEST_DESKTOPTHEME="$DATA_HOME/plasma/desktoptheme"
 DEST_LNF="$DATA_HOME/plasma/look-and-feel"
+DEST_KONSOLE="$DATA_HOME/konsole"
 
 LNF_ID="org.kde.tokyonight.macos.desktop"
 COLORSCHEME="TokyoNight"
+KONSOLE_SCHEME="TokyoNight"
 DESKTOPTHEME="Tokyo-Night"
 KLASSY_PRESET="$SCRIPT_DIR/klassy/TokyoNight.klpw"
 KLASSY_PRESET_NAME="TokyoNight"
+
+# Albert launcher (macOS Spotlight-style). Shipped from a NON-OFFICIAL OBS repo.
+ALBERT_AUTOSTART_SRC="$SRC/autostart/albert.desktop"
+ALBERT_REPO_FILE="/etc/yum.repos.d/home:manuelschneid3r.repo"
 
 # --- helpers -----------------------------------------------------------------
 c_info()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
@@ -79,10 +86,13 @@ check_prereqs() {
 # --- install assets ----------------------------------------------------------
 install_assets() {
     c_info "Installing theme assets…"
-    mkdir -p "$DEST_COLORS" "$DEST_DESKTOPTHEME" "$DEST_LNF"
+    mkdir -p "$DEST_COLORS" "$DEST_DESKTOPTHEME" "$DEST_LNF" "$DEST_KONSOLE"
 
     install -m 0644 "$SRC/color-schemes/$COLORSCHEME.colors" "$DEST_COLORS/"
     c_ok "color scheme -> $DEST_COLORS/$COLORSCHEME.colors"
+
+    install -m 0644 "$SRC/color-schemes/$KONSOLE_SCHEME.colorscheme" "$DEST_KONSOLE/"
+    c_ok "konsole scheme -> $DEST_KONSOLE/$KONSOLE_SCHEME.colorscheme"
 
     rm -rf "$DEST_DESKTOPTHEME/$DESKTOPTHEME"
     cp -a "$SRC/desktoptheme/$DESKTOPTHEME" "$DEST_DESKTOPTHEME/"
@@ -102,6 +112,10 @@ backup_config() {
     for f in kdeglobals kwinrc plasma-org.kde.plasma.desktop-appletsrc ksplashrc plasmarc; do
         [ -f "$CONFIG_HOME/$f" ] && cp -a "$CONFIG_HOME/$f" "$ts_dir/" || true
     done
+    # Konsole default profile (apply may repoint its ColorScheme).
+    local kprof
+    kprof="$(konsole_default_profile)"
+    [ -n "$kprof" ] && [ -f "$DEST_KONSOLE/$kprof" ] && cp -a "$DEST_KONSOLE/$kprof" "$ts_dir/" || true
     c_ok "Backed up live config to $ts_dir"
     echo "$ts_dir" > "$DATA_HOME/tokio-night-backups/latest"
 }
@@ -114,6 +128,12 @@ qdbus_cli() {
 }
 
 kwin_reconfigure() { qdbus_cli org.kde.KWin /KWin reconfigure 2>/dev/null || true; }
+
+# Name of Konsole's default profile file (e.g. "Perfil 1.profile"), or empty.
+konsole_default_profile() {
+    command -v kreadconfig6 >/dev/null 2>&1 || return 0
+    kreadconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile 2>/dev/null || true
+}
 
 # Write a kwinrc key (kwriteconfig6 only; warn if absent).
 kw() { kwriteconfig6 --file kwinrc --group "$1" --key "$2" "$3"; }
@@ -179,9 +199,27 @@ apply_theme() {
         c_warn "Install Klassy; see docs/PREREQUISITES.md."
     fi
 
+    # 3c) Konsole: point the default profile at the Tokyo Night scheme. There is no
+    # global "apply" CLI for Konsole — the scheme is set per profile. Open profiles
+    # only pick it up on new windows.
+    apply_konsole
+
     # 4) Reload KWin so decoration/blur/translucency take effect now.
     kwin_reconfigure
     c_ok "Applied. If the dock/menu bar still looks stale, log out and back in once."
+}
+
+# Set the Konsole default profile's ColorScheme to the Tokyo Night scheme.
+apply_konsole() {
+    local prof
+    prof="$(konsole_default_profile)"
+    if [ -n "$prof" ] && [ -f "$DEST_KONSOLE/$prof" ] && command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file "$DEST_KONSOLE/$prof" --group Appearance --key ColorScheme "$KONSOLE_SCHEME"
+        c_ok "Konsole default profile ($prof) -> $KONSOLE_SCHEME (reopen windows to see it)"
+    else
+        c_warn "No default Konsole profile found — open Konsole → Settings → Edit Current Profile"
+        c_warn "→ Appearance and select '$KONSOLE_SCHEME'."
+    fi
 }
 
 # --- padding KWin script (sibling submodule) ---------------------------------
@@ -198,12 +236,67 @@ install_padding() {
     fi
 }
 
+# --- albert launcher (non-official OBS repo) ---------------------------------
+# Install the Albert launcher and add it to the KDE autostart. The autostart
+# entry is user-level and always ensured; the package itself comes from the
+# NON-OFFICIAL openSUSE Build Service repo `home:manuelschneid3r` (Fedora/dnf
+# only, needs sudo). If Albert is already present, only the autostart is written.
+install_albert() {
+    c_info "Setting up the Albert launcher…"
+
+    # Autostart entry (user-level) — always ensure it.
+    mkdir -p "$AUTOSTART_DIR"
+    install -m 0644 "$ALBERT_AUTOSTART_SRC" "$AUTOSTART_DIR/albert.desktop"
+    c_ok "Albert autostart -> $AUTOSTART_DIR/albert.desktop"
+
+    if command -v albert >/dev/null 2>&1; then
+        c_ok "Albert already installed ($(albert --version 2>/dev/null | awk '{print $2}'))."
+        return 0
+    fi
+
+    if ! command -v dnf5 >/dev/null 2>&1 && ! command -v dnf >/dev/null 2>&1; then
+        c_warn "dnf not found — Albert not installed. Install it manually; see docs/PREREQUISITES.md."
+        return 0
+    fi
+
+    local ver
+    ver="$(. /etc/os-release && echo "${VERSION_ID:-}")"
+    if [ -z "$ver" ]; then
+        c_warn "Could not detect the Fedora version — skipping Albert package install."
+        return 0
+    fi
+
+    c_warn "Adding the NON-OFFICIAL Albert OBS repo and installing (needs sudo)…"
+    local base="https://download.opensuse.org/repositories/home:/manuelschneid3r/Fedora_$ver"
+    if ! sudo tee "$ALBERT_REPO_FILE" >/dev/null <<EOF
+[home_manuelschneid3r]
+name=home:manuelschneid3r (Fedora_$ver)
+type=rpm-md
+baseurl=$base/
+gpgcheck=1
+gpgkey=$base/repodata/repomd.xml.key
+enabled=1
+EOF
+    then
+        c_warn "Could not write the Albert repo file — skipping. See docs/PREREQUISITES.md."
+        return 0
+    fi
+    c_ok "Albert OBS repo -> $ALBERT_REPO_FILE"
+
+    if sudo dnf install -y albert; then
+        c_ok "Albert installed."
+    else
+        c_warn "Albert install failed — install it manually; see docs/PREREQUISITES.md."
+    fi
+}
+
 # --- main --------------------------------------------------------------------
 check_prereqs
 install_assets
 if [ "$APPLY" -eq 1 ]; then
     backup_config
     apply_theme
+    install_albert
     install_padding
 else
     c_info "Assets installed; --no-apply set, not applying."
