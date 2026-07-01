@@ -6,6 +6,8 @@ Each theme lives in its own directory and ships its own recolored copies of ever
 component (color scheme, Plasma desktop theme, window decorations, Look & Feel package) —
 no dependency on other installed themes. Every theme has its own `install.sh` / `uninstall.sh`.
 
+![Tokyo Night (macOS) theme](tokio-night/docs/screenshot.png)
+
 ## Themes
 
 | Theme | Directory | Description |

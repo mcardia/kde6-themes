@@ -7,6 +7,8 @@ desktop: a top panel with a global menu, system tray and clock, and a bottom ico
 The theme is **self-contained** — it ships its own recolored copies of every visual
 component and does not depend on other installed themes or extra plasmoids.
 
+![Tokyo Night (macOS) theme](docs/screenshot.png)
+
 ## What's included
 
 - **Color scheme** — `Tokyo Night` (static; does not change with the wallpaper).
