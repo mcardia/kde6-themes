@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Tokyo Night",
+  "version": "1.0",
+  "description": "Tokyo Night theme matching the kde6-themes Tokyo Night desktop.",
+  "theme": {
+    "colors": {
+      "frame": [22, 22, 30],
+      "frame_inactive": [22, 22, 30],
+      "toolbar": [36, 40, 59],
+      "tab_text": [192, 202, 245],
+      "tab_background_text": [86, 95, 137],
+      "toolbar_text": [169, 177, 214],
+      "toolbar_button_icon": [169, 177, 214],
+      "omnibox_background": [26, 27, 38],
+      "omnibox_text": [192, 202, 245],
+      "bookmark_text": [169, 177, 214],
+      "ntp_background": [26, 27, 38],
+      "ntp_text": [192, 202, 245],
+      "ntp_link": [122, 162, 247],
+      "button_background": [36, 40, 59]
+    },
+    "tints": {
+      "buttons": [0.62, 0.35, 0.75]
+    }
+  }
+}

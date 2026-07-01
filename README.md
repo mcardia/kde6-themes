@@ -12,7 +12,7 @@ no dependency on other installed themes. Every theme has its own `install.sh` / 
 
 | Theme | Directory | Description |
 |-------|-----------|-------------|
-| Tokyo Night (macOS) | [`tokio-night/`](tokio-night/) | Tokyo Night palette + macOS-style top panel and floating bottom dock, with native translucent panels and blur. |
+| Tokyo Night (macOS) | [`tokio-night/`](tokio-night/) | Tokyo Night palette + macOS-style top panel and floating bottom dock, with native translucent panels and blur. Also bundles a matching Chrome theme. |
 
 ## Usage
 

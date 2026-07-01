@@ -26,6 +26,8 @@ component and does not depend on other installed themes or extra plasmoids.
 - **Albert launcher** — a macOS Spotlight-style launcher, installed by `install.sh` and added
   to the KDE autostart. Albert comes from a **non-official** repo; see
   [docs/PREREQUISITES.md](docs/PREREQUISITES.md).
+- **Chrome theme** — `chrome/tokyo-night/`, a colors-only Google Chrome / Chromium theme in
+  the same palette. Installed manually (see below), not by `install.sh`.
 
 ## How the panels work (no extra plasmoid required)
 
@@ -51,6 +53,17 @@ translucent but unblurred; without Klassy, the window buttons/corners won't be t
 
 `install.sh` backs up your live `kdeglobals`, `kwinrc`, panel and splash config (and your
 default Konsole profile) to `~/.local/share/tokio-night-backups/<timestamp>/` before applying.
+
+## Chrome theme
+
+To style Chrome / Chromium in the same palette:
+
+1. Open `chrome://extensions` and enable **Developer mode** (top right).
+2. Click **Load unpacked** and select the `tokio-night/chrome/tokyo-night/` directory.
+3. The theme applies immediately.
+
+To remove it, go to `chrome://settings/appearance` and click **Reset to default**
+(or remove the extension from `chrome://extensions`).
 
 ## Uninstall
 
